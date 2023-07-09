@@ -37,6 +37,7 @@ validation and logging, making it complex and less manageable.
 - [Reference Documentation](#reference-documentation)
 - [Practical Usage Examples](#practical-usage-examples)
 	- [Creating a Central Middleware Application Function](#creating-a-central-middleware-application-function)
+	- [Making Assertions with `midl`](#making-assertions-with-midl)
 	- [Adding Global Middleware in Class Methods](#adding-global-middleware-in-class-methods)
 	- [Applying Middleware while Importing and Exporting](#applying-middleware-while-importing-and-exporting)
 	- [Augmenting the Function.prototype](#augmenting-the-functionprototype)
@@ -180,6 +181,31 @@ The function returns a new version of the original function with the middleware 
 
 ## Practical Usage Examples
 
+In this section, we provide several practical examples that demonstrate various ways you can use `midl` to handle
+diverse application requirements. The examples here are designed to help you better understand how `midl` can integrate
+into your codebase and bring value. They will guide you on using middleware to solve common problems in a simple and
+elegant way.
+
+We've covered a wide range of scenarios to demonstrate the versatility of `midl`. The examples include creating a
+central middleware function, using global middleware in class methods, applying middleware during importing and
+exporting, enhancing the `Function.prototype`, overriding `Function.prototype.call`, and using middleware configuration
+files.
+
+In addition, we have included a few advanced examples that show how you can use `midl` to facilitate A/B testing,
+implement the circuit breaker pattern, enable caching and memoization, and provide fine-grained authentication and
+authorization.
+
+These examples are designed to be more than just a demonstration of `midl`'s capabilities; they also provide practical
+code snippets that you can adapt to your specific needs. They are complete and ready to use, but they are also flexible
+enough for you to modify and expand upon based on your unique project requirements.
+
+Remember, while these examples cover a wide array of usage scenarios, they merely scratch the surface of what `midl` can
+do. Middleware provides a powerful abstraction for encapsulating and modularizing behavior in a way that is easy to
+understand, manage, and test. As you become more comfortable with `midl`, you'll discover new and creative ways to use
+middleware to improve your code.
+
+Let's dive in and explore these examples together.
+
 ### Creating a Central Middleware Application Function
 
 When designing complex applications, it's essential to have a strategy that allows you to keep your codebase clean,
@@ -235,6 +261,84 @@ duplication and making the middleware easier to manage.
 
 Remember, middleware functions can also modify the inputs and outputs of the function, or handle errors in a specific
 way. You should adjust the middleware functions to suit your specific needs.
+
+### Making Assertions with `midl`
+
+Assertions are a powerful way to catch errors early in your code. They allow you to specify the conditions that must be
+true at a certain point in your program, and if these conditions are not met, an error is thrown immediately.
+With `midl`, you can seamlessly incorporate assertions into your functions to improve the robustness and reliability of
+your code.
+
+Here's a simple example to illustrate this. Let's consider a function `multiply`, which multiplies two numbers:
+
+```typescript
+function multiply(a: number, b: number): number {
+	return a * b;
+}
+```
+
+We can add assertions to this function using `midl` like so:
+
+```typescript
+import {createFunctionWithMiddleware} from 'midl';
+
+const multiplyWithAssertions = createFunctionWithMiddleware(multiply, {
+	assertions: [
+		[[2, 3], 6],
+		[[-2, 3], -6],
+		[[0, 3], 0],
+	],
+});
+
+console.log(multiplyWithAssertions(2, 3)); // Output: 6
+```
+
+In this example, we specify three assertions:
+
+1. The function `multiply(2, 3)` should return `6`.
+2. The function `multiply(-2, 3)` should return `-6`.
+3. The function `multiply(0, 3)` should return `0`.
+
+If any of these conditions are not met, an error will be thrown.
+
+Here's another example with a more complex function. Let's say you have a function `sumArray` that sums the elements of
+an array:
+
+```typescript
+function sumArray(arr: number[]): number {
+	return arr.reduce((sum, num) => sum + num, 0);
+}
+```
+
+We can add assertions to this function as follows:
+
+```typescript
+import {createFunctionWithMiddleware} from 'midl';
+
+const sumArrayWithAssertions = createFunctionWithMiddleware(sumArray, {
+	assertions: [
+		[[[1, 2, 3, 4, 5]], 15],
+		[[[0, 0, 0]], 0],
+		[[[]], 0],
+	],
+});
+
+console.log(sumArrayWithAssertions([1, 2, 3, 4, 5])); // Output: 15
+```
+
+In this case, we're checking:
+
+1. The function `sumArray([1, 2, 3, 4, 5])` should return `15`.
+2. The function `sumArray([0, 0, 0])` should return `0`.
+3. The function `sumArray([])` should return `0`.
+
+Note that for functions with multiple input parameters, you would add assertions as pairs of inputs and expected
+outputs. For single-parameter functions like `sumArray`, the input array should be wrapped in another array (
+e.g., `[[1, 2, 3, 4, 5]]`), as shown above.
+
+Incorporating assertions using `midl` can greatly simplify the process of debugging and testing your functions. By
+defining the expected outcomes for certain inputs directly in your function definitions, you can ensure that your code
+behaves as expected, and catch any errors or deviations from the intended behavior early on.
 
 ## Adding Global Middleware in Class Methods
 
